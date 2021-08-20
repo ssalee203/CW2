@@ -1,0 +1,62 @@
+
+pipeline 
+{
+  agent any
+
+  stages
+  {
+    
+    stage('Building image')
+    {
+      steps
+      {
+        script
+        { 
+
+app = docker.build("yourDockerID/node-web-app:${env.BUILD_NUMBER}")
+}
+
+
+
+
+        }
+      }
+    }
+
+    stage('Pushing Image')
+    {
+      steps
+      {
+        script
+        {
+   
+docker.withRegistry('https://registry.hub.docker.com', 'ssalee203') {
+            app.push("${env.BUILD_NUMBER}")
+            app.push("latest")
+
+docker push ssalee203/cw2:tagname
+
+
+        }
+      }
+    }
+  
+    stage('Roll Update')
+    {
+      steps
+      {
+node {
+    checkout scm
+    def customImage = docker.build("my-image:${env.BUILD_ID}")
+    customImage.push()
+
+    customImage.push('latest')
+}
+
+
+
+      }
+    }
+  }   
+}
+
